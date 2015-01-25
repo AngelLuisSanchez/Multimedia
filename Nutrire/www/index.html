@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Nutrire</title>
+    <meta charset="utf-8"/>
+    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <link rel="stylesheet" href="css/themes/theme.css" />
+    <link rel="stylesheet" href="css/themes/jquery.mobile.icons.min.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile.structure-1.4.5.min.css" /> 
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+
+    document.addEventListener("deviceready", onDeviceReady, false);
+
+    function onDeviceReady() {
+        var db = window.openDatabase("Registro", "1.0", "BD", 200000);
+        db.transaction(creaDB, errorCB, successCB);
+    }
+
+    function creaDB(tx) {
+        tx.executeSql('DROP TABLE IF EXISTS USUARIO');
+        tx.executeSql('CREATE TABLE IF NOT EXISTS USUARIO (id unique, user, password)');
+        tx.executeSql('INSERT INTO USUARIO (id, user, password) VALUES (1, "admin", "admin")');
+    }
+
+    function errorCB(tx, err) {
+        navigator.notification.alert("Error processing SQL: "+err);
+    }
+
+    function successCB() {
+        //alert("success!");
+    }
+
+    function execute(){
+        var db = window.openDatabase("Registro", "1.0", "BD", 200000);
+        db.transaction(queryDB, errorCB);
+    }
+
+    function queryDB(tx) {
+        tx.executeSql('SELECT * FROM USUARIO', [], function (tx, results) {
+            if (results.rows.item(0).user == document.getElementById("user").value && results.rows.item(0).password == document.getElementById("password").value){
+                window.location = "app.html";
+            }else{
+                navigator.notification.alert("Tu usuario o contraseña son incorrectos",null,"Error login", "Aceptar");
+            }
+        });
+    }
+    </script>
+  </head>
+  <body>
+    <header><h1>Nutrire</h1></header>
+
+        <center>
+            <div id="principal">
+                <div id="secundario">
+                    <form method="post" id="form">
+                        <label>Usuario:</label>
+                        <input type="text" id="user" name="user"/><br>
+
+                        <label>Contraseña:</label>
+                        <input type="password" id="password" name="password"/><br>
+
+                        <div class="ui-grid-a">
+                            <div class="ui-block-a"><input type="button" class="button" onclick="execute()" value="Enter"/></div>
+                            <div class="ui-block-b"><input type="reset" class="button" value="Reset"></div>
+                        </div>
+                        
+                    </form>
+                </div>
+            </div>
+        </center>
+        <footer data-role="footer" data-position="fixed" data-theme="c">
+            
+        </footer>
+        
+  </body>
+</html>

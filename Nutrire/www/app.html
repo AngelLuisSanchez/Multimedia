@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8" />
+		<!-- Visualización optimizada par móvil / tablet -->
+		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximun-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+
+		<!-- Inclusión de scripts necesarios -->
+		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+		<script type="text/javascript" src="cordova.js"></script>
+		
+		<link rel="stylesheet" href="css/themes/theme.css" />
+  		<link rel="stylesheet" href="css/themes/jquery.mobile.icons.min.css" />
+		<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile.structure-1.4.5.min.css" /> 
+		<link rel="stylesheet" href="css/app.css" />
+		
+		<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+		<script src="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src='js/Chart.min.js'></script>
+		<script type="text/javascript" charset="utf-8" src='js/Chart.js'></script>
+        <script type="text/javascript" charset="utf-8">
+
+            document.addEventListener("deviceready", onDeviceReady, false);
+
+            function onDeviceReady() {
+                var db = window.openDatabase("AppDB", "1.0", "BD", 200000);
+                db.transaction(creaDB, errorCB, successCB);
+            }
+
+            function creaDB(tx) {
+				tx.executeSql("DROP TABLE IF EXISTS alimentos");
+
+				var sql = "CREATE TABLE IF NOT EXISTS alimentos ( "+
+				"id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+				"nombre VARCHAR(300), " +
+				"nombrefoto VARCHAR(100), " +
+				"tipo VARCHAR(50), " +
+				"calorias INTEGER(10), " +
+				"foto VARCHAR(200) )";
+				tx.executeSql(sql);
+
+				//Desayunos
+				tx.executeSql("INSERT INTO alimentos (id,nombre,nombrefoto,tipo,calorias,foto) VALUES (1,'Leche, tostadas con mermelada o tomate, zumo de naranja natural','desayuno1','desayuno',246,'')");
+				tx.executeSql("INSERT INTO alimentos (id,nombre,nombrefoto,tipo,calorias,foto) VALUES (2,'Leche, cereales sin azucar y una manzana','desayuno2','desayuno',226,'')");
+				tx.executeSql("INSERT INTO alimentos (id,nombre,nombrefoto,tipo,calorias,foto) VALUES (3,'2 yogures desnatados con salvado de trigo y una naranja','desayuno3','desayuno',226,'')");
+				//Comidas
+				tx.executeSql("INSERT INTO alimentos (id,nombre,nombrefoto,tipo,calorias,foto) VALUES (4,'Ensalada, lentejas y de postre naranja o mandarina','comida1','comida',650,'')");
+				tx.executeSql("INSERT INTO alimentos (id,nombre,nombrefoto,tipo,calorias,foto) VALUES (5,'Caldo desgrasado (de pollo o verdura), lubina al horno con brochetas de verdura (calabacin, berenjena, pimiento rojo y verde) y de postre una fruta','comida2','comida',350,'')");
+				tx.executeSql("INSERT INTO alimentos (id,nombre,nombrefoto,tipo,calorias,foto) VALUES (6,'Ensalada mixta, pollo asado con patata asada y de postre fruta','comida3','comida',665,'')");
+				tx.executeSql("INSERT INTO alimentos (id,nombre,nombrefoto,tipo,calorias,foto) VALUES (7,'Pure de verduras, solomillo de ternera a la plancha con patatas con cebolla caramelizada  y de postre una fruta','comida4','comida',490,'')");
+				//Cenas
+				tx.executeSql("INSERT INTO alimentos (id,nombre,nombrefoto,tipo,calorias,foto) VALUES (8,'Ensalada de judias verdes(judias, huevo duro, tomate, atun) y de postre una fruta','cena1','cena',415,'')");
+				tx.executeSql("INSERT INTO alimentos (id,nombre,nombrefoto,tipo,calorias,foto) VALUES (9,'Caldo de verduras desgrasado, espinacas salteadas con jamon y ajo, postre una naranja o mandarina','cena2','cena',330,'')");
+				tx.executeSql("INSERT INTO alimentos (id,nombre,nombrefoto,tipo,calorias,foto) VALUES (10,'Pechuga de pollo a la plancha con tomate y zanahoria, postre a elegir','cena3','cena',410,'')");
+				tx.executeSql("INSERT INTO alimentos (id,nombre,nombrefoto,tipo,calorias,foto) VALUES (11,'Ensalada mixta y lenguado a la plancha, postre a elegir','cena4','cena',285,'')");
+            }
+
+            function errorCB(err) {
+                navigator.notification.alert("Error processing SQL: "+err);
+            }
+
+            function successCB() {
+                //alert("success!");
+                cargaDatos();
+            }
+
+            function cargaDatos(){
+              var db = window.openDatabase("AppDB", "1.0", "BD", 200000);
+              db.transaction(cargaRegistros, errorCB);
+            }
+
+            function cargaRegistros(tx){
+                tx.executeSql('SELECT * FROM alimentos', [],  function (tx, results){
+                  if(results.rows.length == 0){
+                    navigator.notification.alert("No se han recibido registros");
+                  }
+                  for (var i = 0; i < results.rows.length; i++) {
+                    var alimento = results.rows.item(i);
+                    var selector = $("#lista_" + alimento.tipo + " ul");
+                    var foto = alimento.foto;
+                    if (foto == ""){
+                      foto = 'img/' + alimento.nombrefoto + '.png';
+                    }
+                    selector.append('<li><img src="' + foto +'"/><div style=" white-space:pre-line;"><b>Etiqueta: </b>' + alimento.nombrefoto + '<br><b>Descripción: </b>' + alimento.nombre+ '<br><b>Calorías: </b>' + alimento.calorias +'</div></li>');
+                  }
+                });
+            }
+
+    </script>
+	<title>Home</title>
+	</head>
+
+	<body>
+		<!-- SOBRE MI -->
+		<section id="HOME" data-role="page">
+			<header data-role="header">
+				Home
+				<div class="ui-btn-right">
+					<a href="#AYUDA_HOME" data-role="button" data-inline="true" data-iconpos="right">Ayuda</a>
+				</div>
+			</header>
+			<br>
+			<center><h2>¡Bienvenido a Nutrire!</h2></center>
+			<div id="logo">
+				
+			</div>
+
+			<!-- Inicio menu footer -->
+			<footer data-role = "footer" data-id="menu" data-position="fixed">
+				<nav data-role="navbar">
+					<ul>
+						<li><a href="#HOME" data-icon="home">Home</a></li>
+						<li><a href="#MENU" data-icon="grid">Menú</a></li>
+						<li><a href="#SUBIRFOTOS" data-icon="gear">Tu Foto</a></li>
+						<li><a href="#PROGRESO" data-icon="star">Progreso</a></li>
+						<li><a href="#INFO" data-icon="info">Info</a></li>
+					</ul>
+				</nav>
+			</footer>
+			<!-- Fin menu footer -->
+		</section>
+		<!-- FIN SOBRE MI -->
+
+		<section id="AYUDA_HOME" data-role="page">
+			<header data-role="header">
+				Ayuda
+				<div class="ui-btn-left">
+					<a href="#HOME" data-role="button" data-inline="true" data-icon="back" data-iconpos="notext">Ayuda</a>
+				</div>
+			</header>
+			<article data-role="content">
+			<div class="ayuda">
+				Nutrire es una app que te servirá como guía para una correcta alimentación. A continuación, vamos a describir las secciones de la aplicación:
+				<ul data-role="listview">
+					<div style=" white-space:pre-line;">
+						<ol>- <b>Menú</b>: en esta sección se mostrará los menús disponibles, incluyen desayunos, comidas y cenas. Además, se podrá configurar un menú diario</ol>
+						<ol>- <b>Tu Foto</b>: esta sección se sólo se encargará de la realización de la fotografía personal, para que llevemos un control de nuestro progreso físico</ol>
+						<ol>- <b>Progreso:</b> esta sección, quizá sea la más compleja. Muestra las fotos realizadas en la sección "Tu Foto", y la fecha de realización de dicha foto. Por un lado nos puede calcular nuestro IMC (Índice de Masa Corporal), que servirá como indicador sobre nuestro estado físico. Por otro lado, mostrará una gráfica con la evolución mensual de nuestro peso.</ol>
+						<ol>- <b>Info</b>: en esta sección podrás encontrar la manera de contactar con nosotros, tanto por email como por teléfono. Además, podrás llegar sin ningún tipo de problema a nuestra clínica.</ol>
+					</div>
+				</ul>
+			</div>
+			</article>
+		</section>
+
+		<section id="AYUDA_MENU" data-role="page">
+			<header data-role="header">
+				Ayuda
+				<div class="ui-btn-left">
+					<a href="#MENU" data-role="button" data-inline="true" data-icon="back" data-iconpos="notext">Ayuda</a>
+				</div>
+			</header>
+			<article data-role="content">
+			<div class="ayuda">
+				Nutrire es una app que te servirá como guía para una correcta alimentación. A continuación, vamos a describir las secciones de la aplicación:
+				<ul data-role="listview">
+					<div style=" white-space:pre-line;">
+						<ol>- <b>Menú</b>: en esta sección se mostrará los menús disponibles, incluyen desayunos, comidas y cenas. Además, se podrá configurar un menú diario</ol>
+						<ol>- <b>Tu Foto</b>: esta sección se sólo se encargará de la realización de la fotografía personal, para que llevemos un control de nuestro progreso físico</ol>
+						<ol>- <b>Progreso:</b> esta sección, quizá sea la más compleja. Muestra las fotos realizadas en la sección "Tu Foto", y la fecha de realización de dicha foto. Por un lado nos puede calcular nuestro IMC (Índice de Masa Corporal), que servirá como indicador sobre nuestro estado físico. Por otro lado, mostrará una gráfica con la evolución mensual de nuestro peso.</ol>
+						<ol>- <b>Info</b>: en esta sección podrás encontrar la manera de contactar con nosotros, tanto por email como por teléfono. Además, podrás llegar sin ningún tipo de problema a nuestra clínica.</ol>
+					</div>
+				</ul>
+			</div>
+			</article>
+		</section>
+
+		<section id="AYUDA_PROGRESO" data-role="page">
+			<header data-role="header">
+				Ayuda
+				<div class="ui-btn-left">
+					<a href="#PROGRESO" data-role="button" data-inline="true" data-icon="back" data-iconpos="notext">Ayuda</a>
+				</div>
+			</header>
+			<article data-role="content">
+			<div class="ayuda">
+				Nutrire es una app que te servirá como guía para una correcta alimentación. A continuación, vamos a describir las secciones de la aplicación:
+				<ul data-role="listview">
+					<div style=" white-space:pre-line;">
+						<ol>- <b>Menú</b>: en esta sección se mostrará los menús disponibles, incluyen desayunos, comidas y cenas. Además, se podrá configurar un menú diario</ol>
+						<ol>- <b>Tu Foto</b>: esta sección se sólo se encargará de la realización de la fotografía personal, para que llevemos un control de nuestro progreso físico</ol>
+						<ol>- <b>Progreso:</b> esta sección, quizá sea la más compleja. Muestra las fotos realizadas en la sección "Tu Foto", y la fecha de realización de dicha foto. Por un lado nos puede calcular nuestro IMC (Índice de Masa Corporal), que servirá como indicador sobre nuestro estado físico. Por otro lado, mostrará una gráfica con la evolución mensual de nuestro peso.</ol>
+						<ol>- <b>Info</b>: en esta sección podrás encontrar la manera de contactar con nosotros, tanto por email como por teléfono. Además, podrás llegar sin ningún tipo de problema a nuestra clínica.</ol>
+					</div>
+				</ul>
+			</div>
+			</article>
+		</section>
+
+		<section id="AYUDA_INFO" data-role="page">
+			<header data-role="header">
+				Ayuda
+				<div class="ui-btn-left">
+					<a href="#INFO" data-role="button" data-inline="true" data-icon="back" data-iconpos="notext">Ayuda</a>
+				</div>
+			</header>
+			<article data-role="content">
+			<div class="ayuda">
+				Nutrire es una app que te servirá como guía para una correcta alimentación. A continuación, vamos a describir las secciones de la aplicación:
+				<ul data-role="listview">
+					<div style=" white-space:pre-line;">
+						<ol>- <b>Menú</b>: en esta sección se mostrará los menús disponibles, incluyen desayunos, comidas y cenas. Además, se podrá configurar un menú diario</ol>
+						<ol>- <b>Tu Foto</b>: esta sección se sólo se encargará de la realización de la fotografía personal, para que llevemos un control de nuestro progreso físico</ol>
+						<ol>- <b>Progreso:</b> esta sección, quizá sea la más compleja. Muestra las fotos realizadas en la sección "Tu Foto", y la fecha de realización de dicha foto. Por un lado nos puede calcular nuestro IMC (Índice de Masa Corporal), que servirá como indicador sobre nuestro estado físico. Por otro lado, mostrará una gráfica con la evolución mensual de nuestro peso.</ol>
+						<ol>- <b>Info</b>: en esta sección podrás encontrar la manera de contactar con nosotros, tanto por email como por teléfono. Además, podrás llegar sin ningún tipo de problema a nuestra clínica.</ol>
+					</div>
+				</ul>
+			</div>
+			</article>
+		</section>
+
+		<section id="MENU" data-role="page">
+			<header data-role="header">
+			Menú
+				<div class="ui-btn-right">
+					<a href="#AYUDA_MENU" data-role="button" data-inline="true" data-iconpos="right">Ayuda</a>
+				</div>
+			</header>
+			<article data-role="content">
+
+	      		<div data-role="collapsible-set">
+	      			<div data-role="collapsible" data-collapsed="true" id="lista_desayuno">
+	      				<h3>Desayuno</h3>
+	      				<ul data-role="listview" data-inset="true"></ul>
+	      			</div>
+	      			<div data-role="collapsible" data-collapsed="true" id="lista_comida">
+	      				<h3>Comida</h3>
+	      				<ul data-role="listview" data-inset="true"></ul>
+	      			</div>
+	      			<div data-role="collapsible" data-collapsed="true" id="lista_cena">
+	      				<h3>Cena</h3>
+	      				<ul data-role="listview" data-inset="true"></ul>
+	      			</div>
+	      		</div>
+	      	</article>
+
+	      	<h3>A continuación, podrás configurar tu menú, ¡elige lo que más te guste!</h3>
+
+	      	<div class="ui-grid-b">
+	      		<div class="ui-block-a">
+	      			<select name="Desayuno" id="Desayuno">
+						<option id="desayuno1">desayuno1</option>
+						<option id="desayuno2">desayuno2</option>
+						<option id="desayuno3">desayuno3</option>
+					</select>
+				</div>
+	      		<div class="ui-block-b">
+	      			<select name="Comida" id="Comida">
+						<option id="comida1">comida1</option>
+						<option id="comida2">comida2</option>
+						<option id="comida3">comida3</option>
+						<option id="comida4">comida4</option>
+					</select>
+				</div>
+	      		<div class="ui-block-c">
+	      			<select name="Cena" id="Cena">
+						<option id="cena1">cena1</option>
+						<option id="cena2">cena2</option>
+						<option id="cena3">cena3</option>
+						<option id="cena4">cena4</option>
+					</select>
+				</div>
+	      	</div>
+
+	      	<div class="ui-grid-b">
+	      		<div class="ui-block-a"></div>
+	      		<div class="ui-block-b"><input type="button" value="Crear Menú" class="button" onclick="crearMenu()"></div>
+	      		<div class="ui-block-c"></div>
+	      	</div>
+
+	      	<script type="text/javascript" charset="utf-8">
+
+		      	function crearMenu(){
+	              var db = window.openDatabase("AppDB", "1.0", "BD", 200000);
+	              db.transaction(Menu, errorCB, successMenu);
+	            }
+
+	            function successMenu(){
+	            	//navigator.notification.alert("exito");
+	            }
+	      		function Menu(tx){
+
+	      			var caloriasTotales = 0;
+
+		    		var posicion_desayuno = document.getElementById("Desayuno").options.selectedIndex;
+					var des = document.getElementById("Desayuno").options[posicion_desayuno].text;
+					var posicion_comida = document.getElementById("Comida").options.selectedIndex;
+					var com = document.getElementById("Comida").options[posicion_comida].text;
+					var posicion_cena = document.getElementById("Cena").options.selectedIndex;
+					var cen = document.getElementById("Cena").options[posicion_cena].text;
+
+					var sql_des;
+					var sql_com;
+					var sql_cen;
+
+					if (des == "desayuno1"){
+						sql_des = 'SELECT * FROM alimentos WHERE nombrefoto="desayuno1"';
+					}else if(des == "desayuno2"){
+						sql_des = 'SELECT * FROM alimentos WHERE nombrefoto="desayuno2"';
+					}else if(des == "desayuno3"){
+						sql_des = 'SELECT * FROM alimentos WHERE nombrefoto="desayuno3"';
+					}
+
+					if (com == "comida1"){
+						sql_com = 'SELECT * FROM alimentos WHERE nombrefoto="comida1"';
+					} else if (com == "comida2"){
+						sql_com = 'SELECT * FROM alimentos WHERE nombrefoto="comida2"';
+					} else if (com == "comida3"){
+						sql_com = 'SELECT * FROM alimentos WHERE nombrefoto="comida3"';
+					} else if (com == "comida4"){
+						sql_com = 'SELECT * FROM alimentos WHERE nombrefoto="comida4"';
+					}
+
+					if (cen == "cena1"){
+						sql_cen = 'SELECT * FROM alimentos WHERE nombrefoto="cena1"';
+					} else if (cen == "cena2"){
+						sql_cen = 'SELECT * FROM alimentos WHERE nombrefoto="cena2"';
+					} else if (cen == "cena3"){
+						sql_cen = 'SELECT * FROM alimentos WHERE nombrefoto="cena3"';
+					} else if (cen == "cena4"){
+						sql_cen = 'SELECT * FROM alimentos WHERE nombrefoto="cena4"';
+					}
+
+					tx.executeSql(sql_des, [], exito_des, error);
+					tx.executeSql(sql_com, [], exito_com, error);
+					tx.executeSql(sql_cen, [], exito_cen, error);
+
+					function exito_des(tx, results){
+						if(results.rows.length == 0){
+                    		navigator.notification.alert("No se han recibido registros");
+                  		}
+
+                  		$("#des").hide();
+
+						for (var j = 0; j < results.rows.length; j++) {
+		                    var alimento = results.rows.item(j);
+		                    $("#des").html("<h4>Desayuno: </h4>" + alimento.nombre + "").show();
+                  		}
+					}
+
+					function exito_com(tx, results){
+						if(results.rows.length == 0){
+                    		navigator.notification.alert("No se han recibido registros");
+                  		}
+
+                  		$("#com").hide();
+
+						for (var j = 0; j < results.rows.length; j++) {
+		                    var alimento = results.rows.item(j);		                
+		                    $("#com").html("<h4>Comida: </h4>" + alimento.nombre).show();
+                  		}
+					}
+
+					function exito_cen(tx, results){
+						if(results.rows.length == 0){
+                    		navigator.notification.alert("No se han recibido registros");
+                  		}
+
+                  		$("#cen").hide();
+
+						for (var j = 0; j < results.rows.length; j++) {
+		                    var alimento = results.rows.item(j);
+		                    $("#cen").html("<h4>Cena: </h4>" + alimento.nombre).show();
+                  		}
+					}
+
+					function error(){
+						navigator.notification.alert("error conexión", null, "Sin conexión", "Aceptar");
+					}
+
+            	}
+	      	</script>
+
+	      	<h3>Tu menú elegido para el  
+	      		<script type="text/javascript" charset="utf-8">
+					var f = new Date();
+					var fecha = (f.getDate() + "/" + (f.getMonth() +1) + "/" + f.getFullYear() + ' ');
+					document.write(fecha);
+				</script>
+				es
+			</h3>
+	      	<div id="des" style=" white-space:pre-line; width:90%;margin-left:5%;"></div>
+	      	<div id="com" style=" white-space:pre-line; width:90%;margin-left:5%;"></div>
+	      	<div id="cen" style=" white-space:pre-line; width:90%;margin-left:5%;"></div>
+	      	<div id="CaloriasTotales"></div>
+
+      		<footer data-role = "footer" data-id="menu" data-position="fixed">
+				<nav data-role="navbar">
+					<ul>
+						<li><a href="#HOME" data-icon="home">Home</a></li>
+						<li><a href="#MENU" data-icon="grid">Menú</a></li>
+						<li><a href="#SUBIRFOTOS" data-icon="gear">Tu Foto</a></li>
+						<li><a href="#PROGRESO" data-icon="star">Progreso</a></li>
+						<li><a href="#INFO" data-icon="info">Info</a></li>
+					</ul>
+				</nav>
+			</footer>
+      	</section>
+
+		<!-- SUBIR FOTOS -->
+		<section id="SUBIRFOTOS" data-role="page">
+			<header data-role="header">Subir Foto</header>
+			<article>
+				<p>Acción realizada</p>
+			</article>
+			<!-- Inicio menu footer -->
+			<footer data-role = "footer" data-id="menu" data-position="fixed">
+				<nav data-role="navbar">
+					<ul>
+						<li><a href="#HOME" data-icon="home">Home</a></li>
+						<li><a href="#MENU" data-icon="grid">Menú</a></li>
+						<li><a href="#SUBIRFOTOS" data-icon="gear">Tu Foto</a></li>
+						<li><a href="#PROGRESO" data-icon="star">Progreso</a></li>
+						<li><a href="#INFO" data-icon="info">Info</a></li>
+					</ul>
+				</nav>
+			</footer>
+			<!-- Fin menu footer -->
+		</section>
+		<!-- FIN SUBIR FOTOS -->
+
+		<!--MI GALERIA -->
+
+		<section id="PROGRESO" data-role="page">
+			<header data-role="header">
+			Progreso
+				<div class="ui-btn-right">
+					<a href="#AYUDA_PROGRESO" data-role="button" data-inline="true" data-iconpos="right">Ayuda</a>
+				</div>
+			</header>
+			<article data-role="content">
+			<div class="ui-grid-a">
+				<div class="ui-block-a"><input type="button" class="button" onclick="anterior()" value="Anterior" /></div>
+				<div class="ui-block-b"><input type="button" class="button" onclick="siguiente()"value="Siguiente"/></div>
+			</div>
+				<img id="galeria" style="max-width:100%;"></img>
+				<center>
+					<div>
+						<script type="text/javascript" charset="utf-8">
+							var f = new Date();
+							var fecha = (f.getDate() + "/" + (f.getMonth() +1) + "/" + f.getFullYear());
+							document.write(fecha);
+						</script>
+					</div>
+				</center>
+				<br>
+				<br>
+				<form method="post" id="calculo">
+					<label for="peso">Peso (kg)</label>
+					<input type="text" name="peso" id="peso" placeholder="Peso (kg)" />
+					<br>
+					<label for="altura">Altura (cm)</label>
+					<input type="text" name="altura" id="altura" placeholder="Altura (cm)" />
+					<div class="ui-grid-a">
+						<div class="ui-block-a"><input type="button" class="button" onclick="calcular()" value="Calcular IMC" /></div>
+						<div class="ui-block-b"><input type="reset" class="button" value="Reset" /></div>
+					</div>
+				</form>
+				
+				<div id="respuesta">
+	        		<!-- Aquí aparecerá tu resultado -->
+	      		</div>
+
+	      		<div class="ui-grid-b">
+	      		<div class="ui-block-a"></div>
+	      		<div class="ui-block-b"><input type="button" value="Añadir Peso" class="button" onclick="añadir()"></div>
+	      		<div class="ui-block-c"></div>
+	      	</div>
+    	
+	      	</script>
+
+
+      		</article>
+
+      		<canvas id="buyers" width="600" height="400">
+      			<!-- Aquí aparecerá el gráfico -->
+      		</canvas>
+
+
+			<!-- Inicio menu footer -->
+			<footer data-role = "footer" data-id="menu" data-position="fixed">
+				<nav data-role="navbar">
+					<ul>
+						<li><a href="#HOME" data-icon="home">Home</a></li>
+						<li><a href="#MENU" data-icon="grid">Menú</a></li>
+						<li><a href="#SUBIRFOTOS" data-icon="gear">Tu Foto</a></li>
+						<li><a href="#PROGRESO" data-icon="star">Progreso</a></li>
+						<li><a href="#INFO" data-icon="info">Info</a></li>
+					</ul>
+				</nav>
+			</footer>
+			<!-- Fin menu footer -->
+		</section>
+		<!-- FIN MI GALERIA -->
+
+      	<section id="INFO" data-role="page">
+			<header data-role="header">
+			Info
+				<div class="ui-btn-right">
+					<a href="#AYUDA_INFO" data-role="button" data-inline="true" data-iconpos="right">Ayuda</a>
+				</div>
+			</header>
+			<article data-role="content">
+				<p>Desde Nutrire estamos abiertos a cualquier sugerencia o consulta ¡Contáctanos, estaremos encantados de atenderte!</p>
+				<div class="ui-grid-a">
+					<div class="ui-block-a"><a href="tel:636934505" data-role="button" class="button">Llamar</a></div>
+					<div class="ui-block-b"><a href="mailto:angel_5z@hotmail.com" data-role="button" class="button">Escribir</a></div>
+				</div>
+				<p>Si desea tener un trato más personalizado, visítenos en <a href="#LLEVAME">nuestra clínica</a></p>
+				<h3>Nuestra dirección es:</h3>
+				<p>Calle Amargura, Nº22 5ºD<br>Puertollano, Ciudad Real<br>C.P.:13500<br>España</p>
+			</article><!-- /content -->
+			<footer data-role = "footer" data-id="menu" data-position="fixed">
+				<nav data-role="navbar">
+					<ul>
+						<li><a href="#HOME" data-icon="home">Home</a></li>
+						<li><a href="#MENU" data-icon="grid">Menú</a></li>
+						<li><a href="#SUBIRFOTOS" data-icon="gear">Tu Foto</a></li>
+						<li><a href="#PROGRESO" data-icon="star">Progreso</a></li>
+						<li><a href="#INFO" data-icon="info">Info</a></li>
+					</ul>
+				</nav>
+			</footer>
+		</section><!-- /page -->
+
+		<!-- LLEVAME -->
+		<section id="LLEVAME" data-role="page">
+			<header data-role="header">LLegar a la consulta</header>
+
+			<div id="map-canvas"></div>
+
+			<!-- Inicio menu footer -->
+			<footer data-role = "footer" data-id="menu" data-position="fixed">
+				<nav data-role="navbar">
+					<ul>
+						<li><a href="#HOME" data-icon="home">Home</a></li>
+						<li><a href="#MENU" data-icon="grid">Menú</a></li>
+						<li><a href="#SUBIRFOTOS" data-icon="gear">Tu Foto</a></li>
+						<li><a href="#PROGRESO" data-icon="star">Progreso</a></li>
+						<li><a href="#INFO" data-icon="info">Info</a></li>
+					</ul>
+				</nav>
+			</footer>
+			<!-- Fin menu footer -->
+		</section>
+		<!-- FIN LLEVAME -->
+
+		<script type="text/javascript" src="js/index.js"></script>
+		
+	</body>
+
+	<script type="text/javascript" charset="utf-8">
+		function calcular(){
+			var peso = document.getElementById("peso").value;
+			var altura = document.getElementById("altura").value;
+			altura = altura / 100;
+			var resultado = peso / (altura * altura);
+
+			if(resultado >= 18 && resultado <=25){
+				$("#respuesta").html("<p>Tu IMC es: " + resultado +  "</p>" + "<br>" + "Tienes normopeso");
+			}else if(resultado > 25 && resultado <=30){
+				$("#respuesta").html("<p>Tu IMC es: " + resultado +  "</p>" + "<br>" + "Tienes sobrepeso");
+			}else if(resultado > 30){
+				$("#respuesta").html("<p>Tu IMC es: " + resultado +  "</p>" + "<br>" + "Tienes obesidad");
+			}else if(resultado < 18){
+				$("#respuesta").html("<p>Tu IMC es: " + resultado +  "</p>" + "<br>" + "Tienes bajopeso");
+			}
+		}
+    </script>
+
+    <script>
+    	var data = {
+    		labels: ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
+    		datasets: [
+        	{
+	        	label: "Meses",
+				fillColor : "rgba(186,186,186,0.4)",
+				strokeColor : "#000000",
+				pointColor : "#fff",
+				pointStrokeColor : "#9DB86D",
+				data : [76.2,75.5,75,74.8,74,74.6,75,74.3,73.8,73.8,73.2,72.6]
+        	}
+    		]
+		};
+
+		var ctx = document.getElementById("buyers").getContext("2d");
+	
+		var myLineChart = new Chart(ctx).Line(data);
+    	
+
+		function añadir(){
+			var peso = document.getElementById("peso").value;
+	      	var f = new Date();
+	      	var fecha = f.getMonth();
+	      	if(peso == ""){
+	      		navigator.notification.alert("Inserte un valor", null, "Error peso", "Ok");
+	      	}else{
+				myLineChart.datasets[0].points[fecha].value = peso;
+				myLineChart.update();
+			}
+		}
+    	
+	</script>
+</html>
