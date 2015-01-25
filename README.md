@@ -1,3 +1,3 @@
 # README #
 
-This is an academic project
+This is an academic project on PhoneGap
